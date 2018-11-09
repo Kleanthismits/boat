@@ -36,8 +36,8 @@ public class Main {
 			Statement stm = connection.createStatement();
 			return stm.executeUpdate(sql);
 		}catch (SQLException | NullPointerException e) {
-			//e.printStackTrace();
-			//System.out.println("You did something wrong!!!");
+			e.printStackTrace();
+			System.out.println("You did something wrong!!!");
 			return -22;
 		}
 		
@@ -49,7 +49,6 @@ public class Main {
 			Statement stm = connection.createStatement();
 		rs = stm.executeQuery(query);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return rs;

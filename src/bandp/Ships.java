@@ -1,6 +1,5 @@
 package bandp;
 
-import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -138,14 +137,18 @@ public class Ships {
 		System.out.println("Select the number of passengers: ");
 		numberOfPassengers = scanner.nextInt();
 		for (int i = 0; i < numberOfPassengers; i++) {
+			if (i==0) {
+				break;
+			}
 			boolean b = false;
 			do {
-			System.out.println("Enter type of " + (i + 1) + " passenger: ");
+			System.out.println("Enter type of passenger no" + (i + 1));
 			System.out.println("1. Regular");
 			System.out.println("2. Elder");
 			System.out.println("3. Student");
 			System.out.println("4. AMEA");
 			System.out.println("5. Baby");
+			System.out.println();
 			String type = scanner.next();
 			if (type.equals("1")) {
 				type = t1;
@@ -162,11 +165,8 @@ public class Ships {
 				System.out.println("Invalid Choice");
 				b = true;
 			}
-			try {
+			
 			main.executeStatement("insert into ships.passengers (passenger_type) values ('"+type+"');");
-			}catch(NullPointerException e) {
-				//e.getMessage();
-			}
 			s.pas.add(new Passengers(type));
 			if(s.pas.size()==s.getNumOfPassengers()) {
 				System.out.println("Passengers limit reached");
@@ -174,14 +174,14 @@ public class Ships {
 			
 			}while(b);
 		}
-		System.out.println("Space left per lane :");
-		System.out.println();
+		System.out.print("Space left per lane :");
 		System.out.print("\t" + "Lane 1: " + (int)lengthLeft1 + "m ");
 		System.out.print("\t" + "Lane 2: " + (int)lengthLeft2 + "m ");
 		System.out.print("\t" + "Lane 3: " + (int)lengthLeft3 + "m ");
 		if (s.getLanes()>3) {
 			System.out.print("\t" + "Lane 4: " + (int)lengthLeft4 + "m ");
 		}
+		System.out.println();
 		System.out.println();
 		System.out.println("Select vehicle type:\n1.Moto\n2.Car\n3.Truck\n4.No Vehicle ");
 		String vehicleChoice = scanner.next();
@@ -199,25 +199,17 @@ public class Ships {
 			
 			
 								if (laneLength(s.lane1)<=laneLength(s.lane2) && (laneLength(s.lane1)+vehicleLength) <= s.getShipLength()) {
-									
-									System.out.println("lane1");
 									s.lane1.add(vehicleLength);
 									lengthLeft1 = (s.getShipLength() - (laneLength(s.lane1)));
 									
 								}else if (laneLength(s.lane2)<=laneLength(s.lane3) && (laneLength(s.lane2)+vehicleLength) <= s.getShipLength()) {
-									
-									System.out.println("lane2");
 									s.lane2.add(vehicleLength);
 									lengthLeft2 = (s.getShipLength() - (laneLength(s.lane2)));
 								}else if (laneLength(s.lane3)<=laneLength(s.lane4) && (laneLength(s.lane3)+vehicleLength) <= s.getShipLength()) {
-									
-									System.out.println("lane3");
 									s.lane3.add(vehicleLength);
 									lengthLeft3 = (s.getShipLength() - (laneLength(s.lane3)));
 								}else if(s.getLanes()>3) {
 									if(laneLength(s.lane4)<=laneLength(s.lane1) && (laneLength(s.lane4)+vehicleLength) <= s.getShipLength()) {
-										
-										System.out.println("lane4");
 										s.lane4.add(vehicleLength);
 										lengthLeft4 = (s.getShipLength() - (laneLength(s.lane4)));
 									}else {
@@ -244,105 +236,106 @@ public class Ships {
 		}else if (vehicleChoice.equals("4")){
 		flag=true;
 		}
-		System.out.println("Print report?");
-		System.out.println("Y for Yes");
-		System.out.println("N for No");
-		String ticket = scanner.next();
-		if (ticket.equalsIgnoreCase("y")) {
-			ResultSet rs3 = main.resultSet("SELECT COUNT(ships.vehicles.vehicle_type) as Quantity,ships.vehicles.vehicle_type as Type,  sum(ships.vehicles.ticket_price) as Total from ships.vehicles\r\n" + 
-					"group by vehicles.vehicle_type;");
-			try {
-				PrintWriter writer = new PrintWriter(new FileWriter("shipReport.txt",true));
-				writer.append(String.format("%-10s %-10s", "Ship :", s.getShipName()));
-				writer.append(System.getProperty( "line.separator" ));
-				writer.append(String.format(""));
-				writer.append(System.getProperty( "line.separator" ));
-				writer.append(String.format("%-10s %-15s %-10s %-10s", "Date: ", cDate, "Time: ", cTime));
-				writer.append(System.getProperty( "line.separator" ));
-				writer.append(String.format(""));
-				writer.append(System.getProperty( "line.separator" ));
-				writer.append(String.format("%25s", "Vehicles Report"));
-				writer.append(System.getProperty( "line.separator" ));
-				writer.append(String.format(""));
-				writer.append(System.getProperty( "line.separator" ));
-				writer.append(String.format("%-12s %-15s %-10s ", "Quantity", "Vehicle Type", "Total amount"));
-				writer.append(System.getProperty( "line.separator" ));
-				writer.append(String.format(""));
-				writer.append(System.getProperty( "line.separator" ));
-				while (rs3.next()) {
-					String count = rs3.getString("Quantity");
-					String vtype = rs3.getString("Type");
-					String sum = rs3.getString("Total");
-					
-					
-					writer.append(String.format("%-12s %-15s %-10s ", count, vtype, sum));
-					writer.append(System.getProperty( "line.separator" ));
-					
-					} 
-				writer.append(System.getProperty( "line.separator" ));
-				writer.append(String.format(""));
-				writer.close();
-			}catch (SQLException | IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					
-			ResultSet rs4 = main.resultSet("SELECT COUNT(passengers.passenger_type) as Quantity,passengers.passenger_type as Type,  sum(ticket_price) as Total from ships.passengers\r\n" + 
-					"group by passengers.passenger_type;");
-			try {
-				PrintWriter writer = new PrintWriter(new FileWriter("shipReport.txt",true));
-				writer.append(String.format("%27s", "Passengers Report"));
-				writer.append(System.getProperty( "line.separator" ));
-				writer.append(String.format(""));
-				writer.append(System.getProperty( "line.separator" ));
-				writer.append(String.format("%-12s %-15s %-10s ", "Quantity", "Passenger Type", "Total amount"));
-				writer.append(System.getProperty( "line.separator" ));
-				writer.append(String.format(""));
-				writer.append(System.getProperty( "line.separator" ));
-				while (rs4.next()) {
-					String count = rs4.getString("Quantity");
-					String vtype = rs4.getString("Type");
-					String sum = rs4.getString("Total");
-						
-					writer.append(String.format("%-12s %-15s %-10s ", count, vtype, sum));
-					writer.append(System.getProperty( "line.separator" ));
-					
-					} 
-				
-				
-				writer.close();
-			}catch (SQLException | IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-			ResultSet rs5 = main.resultSet("SELECT SUM(passengers.ticket_price) as sum from ships.passengers;");
-			while(rs5.next()) {
-				totalPasamount = rs5.getString("sum");
-			}
-			rs5 = main.resultSet("SELECT SUM(vehicles.ticket_price) as sum from ships.vehicles;");
-			while(rs5.next()) {
-				totalVamount = rs5.getString("sum");
-			}	
-			PrintWriter writer = new PrintWriter(new FileWriter("shipReport.txt",true));
-			writer.append(System.getProperty( "line.separator" ));
-			writer.append(String.format(""));
-			writer.append(System.getProperty( "line.separator" ));
-			writer.append(String.format("%-20s %-10s", "Total income from Passengers: ",totalPasamount));
-			writer.append(System.getProperty( "line.separator" ));
-			writer.append(String.format("%-20s %-10s", "Total income from Vehicles: ",totalVamount));
-			writer.append(System.getProperty( "line.separator" ));
-			writer.append(String.format(""));
-			writer.append(System.getProperty( "line.separator" ));
-			writer.append(String.format("%-15s %-10.2f", "Total income: ",(Double.parseDouble(totalPasamount) + Double.parseDouble(totalVamount))));
-			
-			writer.close();
-		}
+		
 		System.out.println("Do you want another action? (Y/N)");
 		String answer=scanner.next();
 		if (answer.equalsIgnoreCase("Y")) {
 			flag=true;
 		}
-		else {flag=false;}
+		else {
+			System.out.println("Print report?");
+			System.out.println("Y for Yes");
+			System.out.println("N for No");
+			String ticket = scanner.next();
+			if (ticket.equalsIgnoreCase("y")) {
+				ResultSet rs3 = main.resultSet("SELECT COUNT(ships.vehicles.vehicle_type) as Quantity,ships.vehicles.vehicle_type as Type,  sum(ships.vehicles.ticket_price) as Total from ships.vehicles\r\n" + 
+						"group by vehicles.vehicle_type;");
+				try {
+					PrintWriter writer = new PrintWriter(new FileWriter("shipReport.txt",true));
+					writer.append(String.format("%-10s %-10s", "Ship :", s.getShipName()));
+					writer.append(System.getProperty( "line.separator" ));
+					writer.append(String.format(""));
+					writer.append(System.getProperty( "line.separator" ));
+					writer.append(String.format("%-10s %-15s %-10s %-10s", "Date: ", cDate, "Time: ", cTime));
+					writer.append(System.getProperty( "line.separator" ));
+					writer.append(String.format(""));
+					writer.append(System.getProperty( "line.separator" ));
+					writer.append(String.format("%25s", "Vehicles Report"));
+					writer.append(System.getProperty( "line.separator" ));
+					writer.append(String.format(""));
+					writer.append(System.getProperty( "line.separator" ));
+					writer.append(String.format("%-12s %-15s %-10s ", "Quantity", "Vehicle Type", "Total amount"));
+					writer.append(System.getProperty( "line.separator" ));
+					writer.append(String.format(""));
+					writer.append(System.getProperty( "line.separator" ));
+					while (rs3.next()) {
+						String count = rs3.getString("Quantity");
+						String vtype = rs3.getString("Type");
+						String sum = rs3.getString("Total");
+						
+						
+						writer.append(String.format("%-12s %-15s %-10s ", count, vtype, sum));
+						writer.append(System.getProperty( "line.separator" ));
+						
+						} 
+					writer.append(System.getProperty( "line.separator" ));
+					writer.append(String.format(""));
+					writer.close();
+				}catch (SQLException | IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						
+				ResultSet rs4 = main.resultSet("SELECT COUNT(passengers.passenger_type) as Quantity,passengers.passenger_type as Type,  sum(ticket_price) as Total from ships.passengers\r\n" + 
+						"group by passengers.passenger_type;");
+				try {
+					PrintWriter writer = new PrintWriter(new FileWriter("shipReport.txt",true));
+					writer.append(String.format("%27s", "Passengers Report"));
+					writer.append(System.getProperty( "line.separator" ));
+					writer.append(String.format(""));
+					writer.append(System.getProperty( "line.separator" ));
+					writer.append(String.format("%-12s %-15s %-10s ", "Quantity", "Passenger Type", "Total amount"));
+					writer.append(System.getProperty( "line.separator" ));
+					writer.append(String.format(""));
+					writer.append(System.getProperty( "line.separator" ));
+					while (rs4.next()) {
+						String count = rs4.getString("Quantity");
+						String vtype = rs4.getString("Type");
+						String sum = rs4.getString("Total");
+							
+						writer.append(String.format("%-12s %-15s %-10s ", count, vtype, sum));
+						writer.append(System.getProperty( "line.separator" ));
+						
+						} 
+					
+					
+					writer.close();
+				}catch (SQLException | IOException e1) {
+							e1.printStackTrace();
+						}
+				ResultSet rs5 = main.resultSet("SELECT SUM(passengers.ticket_price) as sum from ships.passengers;");
+				while(rs5.next()) {
+					totalPasamount = rs5.getString("sum");
+				}
+				rs5 = main.resultSet("SELECT SUM(vehicles.ticket_price) as sum from ships.vehicles;");
+				while(rs5.next()) {
+					totalVamount = rs5.getString("sum");
+				}	
+				PrintWriter writer = new PrintWriter(new FileWriter("shipReport.txt",true));
+				writer.append(System.getProperty( "line.separator" ));
+				writer.append(String.format(""));
+				writer.append(System.getProperty( "line.separator" ));
+				writer.append(String.format("%-20s %-10s", "Total income from Passengers: ",totalPasamount));
+				writer.append(System.getProperty( "line.separator" ));
+				writer.append(String.format("%-20s %-10s", "Total income from Vehicles: ",totalVamount));
+				writer.append(System.getProperty( "line.separator" ));
+				writer.append(String.format(""));
+				writer.append(System.getProperty( "line.separator" ));
+				writer.append(String.format("%-15s %-10.2f", "Total income: ",(Double.parseDouble(totalPasamount) + Double.parseDouble(totalVamount))));
+				writer.close();
+				flag = false;
+			}
+		}
 		
 		}while(flag);
 
